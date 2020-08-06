@@ -1,0 +1,72 @@
+* {
+	font-size: 40px;
+	font-family: Tahoma;
+}
+div.container {
+	display: flex;
+	white-space: nowrap;
+}
+div.general {
+	position: relative;
+	flex-shrink: 0;
+	
+	margin-right: 10px; /*for spacing btw boxes*/
+	border-left: solid 10px #eeeff2; /*for dotted line*/
+	padding-left: 10px;
+
+	width: 100px;
+	height: 150px;
+
+	background-color: #eeeff2;
+
+	cursor: pointer;
+}
+div.general:hover {
+	background-color: yellow;
+	color: goldenrod;
+}
+div.general.last {
+	position: absolute;
+
+	margin-right: 0px;
+	bottom: 0px;
+	right: 0px;
+}
+
+/*https://stackoverflow.com/questions/3090289/overlapping-divs*/
+div.dot {
+	position: absolute;
+
+	top: 0px;
+	left: -10px;
+
+	/*want 10px diameters*/
+    width: 10px;
+    height: 10px;
+    border-radius: 100%; 
+
+    background-color: #D0D0FF;
+}
+
+div.dot.one {}
+div.dot.two {
+	top: 20px;
+}
+div.dot.three {
+	top: 40px;
+}
+div.dot.four {
+	top: 60px;
+}
+div.dot.five {
+	top: 80px;
+}
+div.dot.six {
+	top: 100px;
+}
+div.dot.seven {
+	top: 120px;
+}
+div.dot.eight {
+	top: 140px;
+}

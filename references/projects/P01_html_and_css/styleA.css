@@ -1,4 +1,4 @@
-html, head, body {
+html, head, body, div {
 	/*Set height property for ALL parents, in order to use % values in child.height*/
 	width: 100%; 
 	height: 100%;
