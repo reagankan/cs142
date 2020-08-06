@@ -1,0 +1,10 @@
+Problem #1
+[call/apply functions for binding this keyword] https://gist.github.com/zcaceres/2a4ac91f9f42ec0ef9cd0d18e4e71262
+
+Problem #2
+https://stackoverflow.com/questions/14451073/how-to-add-methods-to-a-function
+[Slide 9] https://web.stanford.edu/class/cs142/lectures/JavaScriptProgramming.pdf
+[using assert, see mintao commented on Mar 10, 2011] https://github.com/visionmedia/expresso/issues/76
+
+Problem #3
+https://general.support.brightcove.com/developer/concepts-javascript-module-design-pattern.html
