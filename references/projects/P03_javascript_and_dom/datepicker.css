@@ -1,0 +1,43 @@
+/*html, body {
+	height: 100%;
+}*/
+
+/*#datepicker0, div.root {
+	height: 30%;
+}*/
+
+div.header {
+	display: flex;
+	justify-content: space-between;
+}
+div.headerItem {
+	/*prevent header from breaking newline.*/
+	flex-shrink: 0;
+
+	font-family: Tacoma;
+	font-size: 80px;
+}
+
+div.matrix {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	grid-auto-rows: min(min-content,5%);
+	grid-gap: 0px;
+
+	/*height: minmax(100px, 5%);*/
+}
+div.matrixItem {
+	font-family: Tacoma;
+	font-size: 40px;
+	border: solid 1px black;
+}
+div.matrixItem.day {
+	/*height: 40px;*/
+}
+
+div.matrixItem.date {
+	/*height: minmax(100px, 1%);*/
+}
+div.footer {
+	display: flex;
+}

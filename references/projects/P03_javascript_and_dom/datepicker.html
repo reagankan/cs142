@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <title>CS 142 Project 3, Problem 1</title>
+    <link rel="stylesheet" type="text/css" href="datepicker.css" />
+  </head>
+  <body>
+
+    <!-- <h1>Experimental DatePicker</h1>
+    <div id="datepicker0" class="root", style="border: solid 3px black;">
+        <div class="header">
+          <div class="headerItem" id="month_day">August XX</div>
+          <div class="headerItem" id="year">2020</div>
+        </div>
+        <div class="matrix">
+          <div class="matrixItem day">Sun</div>
+          <div class="matrixItem day">Mon</div>
+          <div class="matrixItem day">Tue</div>
+          <div class="matrixItem day">Wed</div>
+          <div class="matrixItem day">Thu</div>
+          <div class="matrixItem day">Fri</div>
+          <div class="matrixItem day">Sat</div>
+
+          <div class="matrixItem date">1</div>
+          <div class="matrixItem date">2</div>
+          <div class="matrixItem date">3</div>
+          <div class="matrixItem date">4</div>
+          <div class="matrixItem date">5</div>
+          <div class="matrixItem date">6</div>
+          <div class="matrixItem date">7</div>
+
+          <div class="matrixItem date">11</div>
+          <div class="matrixItem date">12</div>
+          <div class="matrixItem date">13</div>
+          <div class="matrixItem date">14</div>
+          <div class="matrixItem date">15</div>
+          <div class="matrixItem date">16</div>
+          <div class="matrixItem date">17</div>
+        </div>
+        <div class="footer">
+          
+        </div>
+    </div> -->
+
+
+
+    <h1>First DatePicker</h1>
+    <div id="datepicker1"></div>
+    <h1>Second DatePicker</h1>
+    <div id="datepicker2"></div>
+    <h1>Third DatePicker</h1>
+    <div id="datepicker3"></div>
+    <script type="text/javascript" src="DatePicker.js"></script>
+    <script type="text/javascript">
+        //<![CDATA[
+        datePicker1 = new DatePicker("datepicker1", function (id, fixedDate) {
+          console.log("DatePicker with id", id,
+                  "selected date:", fixedDate.month + "/" + fixedDate.day + "/" + fixedDate.year);
+        });
+        datePicker1.render(new Date());
+        datePicker2 = new DatePicker("datepicker2", function (id, fixedDate) {
+          // console.log("DatePicker with id", id,
+                  // "selected date:", fixedDate.month + "/" + fixedDate.day + "/" + fixedDate.year);
+              let msg = "Day(" + fixedDate.day + ") + Year(" + fixedDate.year + ") =";
+              console.log("DatePicker with id", id,
+                  "selected date:", msg, parseInt(fixedDate.day) + parseInt(fixedDate.year))
+        });
+        datePicker2.render(new Date("2/26/2015"));
+
+        // datePicker3 = new DatePicker("datepicker3", function (id, fixedDate) {
+        //   console.log("DatePicker with id", id,
+        //           "selected date:", fixedDate.month + "/" + fixedDate.day + "/" + fixedDate.year);
+        // });
+        // datePicker3.render(new Date("4/26/2003"));
+        //]]>
+    </script>
+  </body>
+</html>
