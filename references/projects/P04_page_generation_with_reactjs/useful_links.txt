@@ -1,0 +1,14 @@
+Install Babel Syntax Highlighting for Sublime 3
+1. get package control
+    src: https://packagecontrol.io/installation
+    steps:
+        Tools > Install Package Control
+2. use package control
+    src: https://packagecontrol.io/docs/usage
+    steps:
+        cmd + shift + p
+        type: Package Control: Install Package
+        type: Babel + enter
+3. activate Babel syntax highlighting
+    step:
+        View > Syntax > Babel > Javascript
