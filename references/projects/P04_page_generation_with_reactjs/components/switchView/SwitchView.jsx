@@ -11,7 +11,7 @@ class SwitchView extends React.Component {
     super(props);
 
     this.state = {
-      currView: cs142models.view1
+      currView: window.cs142models.view1
     };
 
     this.handleButtonPress = this.handleButtonPress.bind(this);

@@ -24,11 +24,11 @@ class States extends React.Component {
     let regex = new RegExp(this.state.substring, "i");
 
     let listItems = [];
-    let allStates = cs142models.statesModel()
+    let allStates = window.cs142models.statesModel()
     for (let i = 0; i < allStates.length; i++) {
       let state = allStates[i];
       if (state.search(regex) !== -1) {
-        let elemClass = (cs142models.democraticStates.has(state)) ? "cs142-states-blue" : "cs142-states-red";
+        let elemClass = (window.cs142models.democraticStates.has(state)) ? "cs142-states-blue" : "cs142-states-red";
 
         listItems.push(<li key={i} className={elemClass}> {state} </li>);
       }

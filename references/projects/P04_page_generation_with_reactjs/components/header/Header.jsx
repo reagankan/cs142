@@ -11,7 +11,10 @@ class Header extends React.Component {
 	}
 	render() {
 		return (
-			<h1> My Header </h1>
+			<div className="header container">
+				<img src="../../imgs/reagan.png" className="header item image"/> 
+				<h1 className="header item"> rkan&apos;s (head)-ER </h1>
+			</div>
 		);
 	}
 }

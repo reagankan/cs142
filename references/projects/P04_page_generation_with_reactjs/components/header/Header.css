@@ -1,0 +1,32 @@
+/** {
+	margin: 0;
+	padding: 0;
+}
+*/
+.header.container {
+	display: flex;
+	/*flex-shrink: 0;*/
+	padding: inherit;
+	white-space: nowrap;
+
+	height: 80px;
+
+	background-color: black;
+
+}
+.header.item {
+	display: inline-block;
+
+	margin: 0;
+	padding-left: 5%;
+	height: inherit;
+
+	font-size: 80px;
+	color: green;
+
+}
+
+.header.item.image {
+	padding: 0;
+	height: inherit;
+}

@@ -1,0 +1,20 @@
+.toolbar:hover {
+	background-color: green;
+}
+
+.toolbar.container {
+	display: flex;
+	justify-content: space-between;
+	/*align-items: center;*/
+
+
+	font-size: 30px;
+	background-color: pink;
+}
+
+.toolbar.item {]
+	display: block;
+	text-align: center;
+	height: 5%;
+	width: 50%;
+}
