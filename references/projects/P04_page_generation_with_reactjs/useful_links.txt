@@ -12,3 +12,31 @@ Install Babel Syntax Highlighting for Sublime 3
 3. activate Babel syntax highlighting
     step:
         View > Syntax > Babel > Javascript
+
+
+Discussion on JS global var and window.var
+https://stackoverflow.com/questions/40043727/what-are-global-variables-and-window-variables-in-javascript
+
+Exporting (in order to import later)
+https://developer.mozilla.org/en-US/docs/web/javascript/reference/statements/export
+
+Event Handlers defined in object NOT available to DOM. (like in project 3, used apply/bind)
+Another option is to use the Arrow (=>) function.
+Tradeoff: => vs bind(): https://stackoverflow.com/questions/50375440/binding-vs-arrow-function-for-react-onclick-event
+Summary: bind is faster. arrow is for readability. order handler params s.t. event is last, so it can work with both.
+
+
+Stopping the node.js webServer.js
+https://stackoverflow.com/questions/4075287/node-express-eaddrinuse-address-already-in-use-kill-server
+
+Dynamically update className
+Attempt 1 [FAIL]: ternary operator with state.attribute as condition fails.
+    a. ternary operator outputs are <p> tags with different classNames
+    b. ONLY ONE <p> tag. ternary operator(inside <p> tag) outputs are className values. 
+src: https://dev.to/cesareferrari/conditionally-assign-a-css-class-to-a-react-component-jk5
+Attempt 2 [SUCCESS]: store className value in this.state. update value in handler.
+src: [dannyjolie] https://stackoverflow.com/questions/36209432/reactjs-add-dynamic-class-to-manual-class-names
+
+
+Why the React.Component constructor gets called on this.setState with <input> tag.
+https://stackoverflow.com/questions/48140654/reactjs-why-are-the-constructor-called-when-setstate-changes-the-state

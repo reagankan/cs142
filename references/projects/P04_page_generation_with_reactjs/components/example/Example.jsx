@@ -23,10 +23,15 @@ class Example extends React.Component {
     // We read the example model data into the state variable 'name'
     this.state = {
       name: window.cs142models.exampleModel().name,
+      motto: window.cs142models.exampleModel().motto,
+      mottoClassName: "cs142-example-motto",
+      mottoButtonInputValue: "",
       counter: 0,
       inputValue: '',
       buttonWasClicked: '',
     };
+
+    this.state.mottoOk = (this.state.motto.length <= 20);
 
     // React events are called directly from DOM event handlers
     // so we cannot directly call the methods of this class. We
@@ -36,6 +41,10 @@ class Example extends React.Component {
     // Note: A commmon idiom in React code is to use JavaScript bind() to
     // smash the method to accomplish this passthrough to the method:
     //      this.handleChange = this.handleChange.bind(this);
+
+    //RKAN3: Problem 1.
+    this.handleMottoChange = this.handleMottoChange.bind(this);
+    this.handleMottoButtonInputChange = this.handleMottoButtonInputChange.bind(this);
   }
 
   // React components have several "lifecycle functions"
@@ -67,6 +76,31 @@ class Example extends React.Component {
   // Method called when the input box is typed into.
   handleChange(event) {
     this.setState({ inputValue: event.target.value });
+  }
+
+  // RKAN3: Problem 1. Input Field.
+  handleMottoChange(useButton, event) {
+    if (useButton) {
+      //<form> tag with <input> of type "submit" will post to the server on default.
+      // if this happens, the constructor is called, and the motto is overriden with the default.
+      event.preventDefault();
+    }
+
+    let userInput = (useButton) ? this.state.mottoButtonInputValue : event.target.value;
+
+    let newMotto = "Motto is too long. Length must be <= 20.";
+    let newClassName = "cs142-example-motto-bad";
+    if (userInput.length <= 20) {
+      newMotto = userInput;
+      newClassName = "cs142-example-motto-good";
+    }
+    this.setState({ motto: newMotto, mottoClassName: newClassName});
+    // console.log((userInput.length <= 20), this.state.motto.length, this.state.mottoClassName);
+  }
+
+  // RKAN3: Problem 1. Button.
+  handleMottoButtonInputChange(event) {
+    this.setState({ mottoButtonInputValue: event.target.value })
   }
 
   // Method called when the button is pushed
@@ -103,7 +137,33 @@ class Example extends React.Component {
         <h1>CS142 Project#4 React.js Example</h1>
 
         <div className="motto-update">
-          {/* Your problem #1 motto displaying and updating widget goes here */}
+          {
+            //THIS FAILS
+            // this.state.mottoOK
+            // ?
+            // (<p className="cs142-example-motto-good">{this.state.motto + "GREEN"}</p>)
+            // :
+            // (<p className="cs142-example-motto-bad">{this.state.motto + " " + this.state.mottoOk}</p>)
+
+            // THIS FAILS
+            // <p className={this.state.mottoOK ? "cs142-example-motto-good" : "cs142-example-motto-bad"}>
+            // {this.state.motto}
+            // </p>
+          }
+          <p className={this.state.mottoClassName}>
+          {this.state.motto}
+          </p>
+          
+          <label htmlFor="mottoInput">Motto Input Field: </label>
+          <input id="mottoInput" type="text" onChange={this.handleMottoChange.bind(this, false)} />
+          
+          <form onSubmit={this.handleMottoChange.bind(this, true)}>
+          <label>
+            Motto Input Field: 
+            <input type="text" onChange={this.handleMottoButtonInputChange}/>
+          </label>
+          <input type="submit" value="Submit New Motto"/>
+        </form>
         </div>
 
         <p>
@@ -403,5 +463,6 @@ class Example extends React.Component {
     );
   }
 }
-
+//so we can import the Example component in gettingStarted.jsx.
+//that is where Example is put into the DOM by calling the ReactDOM.render method.
 export default Example;
