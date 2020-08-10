@@ -27,7 +27,10 @@ Summary: bind is faster. arrow is for readability. order handler params s.t. eve
 
 
 Stopping the node.js webServer.js
-https://stackoverflow.com/questions/4075287/node-express-eaddrinuse-address-already-in-use-kill-server
+Steps
+    1. ps aux | grep node
+    2. kill -9 <PID 0> | <PID 1> ...
+src: https://stackoverflow.com/questions/4075287/node-express-eaddrinuse-address-already-in-use-kill-server
 
 Dynamically update className
 Attempt 1 [FAIL]: ternary operator with state.attribute as condition fails.
