@@ -69,3 +69,17 @@ cs142models.statesModel = function() {
    ];
 };
 
+cs142models.democraticStates = new Set(["California", 
+"Hawaii", 
+"Illinois",
+"Maine",
+"Maryland",
+"Massachusetts",
+"Michigan",
+"Minnesota",
+"New Jersey",
+"New York",
+"Oregon",
+"Rhode Island",
+"Vermont",
+"Washingon"]);
