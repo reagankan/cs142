@@ -6,3 +6,22 @@ src: https://github.com/facebook/react/issues/12214
 
 React Router work on reload, but not when clicking on a link
 https://stackoverflow.com/questions/44356360/react-router-work-on-reload-but-not-when-clicking-on-a-link
+
+
+Promises
+1. Solution
+how ReactComponent lifecycle changes with FETCH (componentDidMount, render)
+	https://reactjs.org/docs/faq-ajax.html
+[how to write fetchModel with XMLHttpRequest / Promises]
+	1. how to format fetchModel()
+		- [Slide 23]: https://web.stanford.edu/class/cs142/lectures/ServerCom.pdf
+	2. how to use XMLHttpRequest
+		- [Slide 03]: https://web.stanford.edu/class/cs142/lectures/ServerCom.pdf
+		- https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/{status, statusText, response, responseType}
+
+2. Various links I looked at. import is no longer needed.
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#Example_using_new_XMLHttpRequest()
+https://stackoverflow.com/questions/30008114/how-do-i-promisify-native-xhr
+https://reactjs.org/docs/faq-ajax.html
+https://www.valentinog.com/blog/await-react/
+[import to fix runtime error]https://stackoverflow.com/questions/53558916/babel-7-referenceerror-regeneratorruntime-is-not-defined

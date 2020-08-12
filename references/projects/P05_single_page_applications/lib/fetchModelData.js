@@ -17,10 +17,21 @@ var Promise = require("Promise");
 
 function fetchModel(url) {
   return new Promise(function(resolve, reject) {
-      console.log(url);
-      setTimeout(() => reject({status: 501, statusText: "Not Implemented"}),0);
-      // On Success return:
-      // resolve({data: getResponseObject});
+      let xhr = new XMLHttpRequest();
+      xhr.responseType = "json"; //specify return type of XMLHttpRequest.response.
+      xhr.onreadystatechange = function () { //called on each readyState change.
+        if (this.readyState != 4) { //ignore all except DONE state, which === 4.
+          return;
+        }
+        if (this.status != 200) { //OK status code === 200. error code !== 200.
+          //call reject handler on fail
+          return reject({status: this.status, statusText: this.statusText});
+        }
+        //call resolve handler on success
+        return resolve({data: this.response});
+      }
+      xhr.open("GET", url);
+      xhr.send();
   });
 }
 
