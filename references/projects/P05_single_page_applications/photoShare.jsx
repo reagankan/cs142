@@ -17,7 +17,6 @@ import UserPhotos from './components/userPhotos/UserPhotos';
 class PhotoShare extends React.Component {
   constructor(props) {
     super(props);
-    window.cs142models.context = "Home Page";
   }
 
   render() {

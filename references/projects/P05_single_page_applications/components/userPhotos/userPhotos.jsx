@@ -15,7 +15,7 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 
-
+import fetchModel from '../../lib/fetchModelData';
 /**
  * Define UserPhotos, a React componment of CS142 project #5
  */
@@ -23,47 +23,94 @@ class UserPhotos extends React.Component {
   constructor(props) {
     super(props);
 
-    let userModel = window.cs142models.userModel(this.props.match.params.userId);
-    let photoModel = window.cs142models.photoOfUserModel(this.props.match.params.userId);
+    // Problem #1: use window.cs142models hack for server.
+    // let userModel = window.cs142models.userModel(this.props.match.params.userId);
+    // let photoModel = window.cs142models.photoOfUserModel(this.props.match.params.userId);
+    // this.state = {
+    //   id: this.props.match.params.userId,
+    //   userModel: userModel,
+    //   first_name: userModel.first_name,
+    //   last_name: userModel.last_name,
+    //   description: userModel.description,
+    //   location: userModel.location,
+    //   occupation: userModel.occupation,
+    //   photoModel: photoModel,
+    //   onlyOnePhoto: (photoModel.length === 1)
+    // }
 
+    // Problem #2: use lib/fetchModel to interface XMLHttpResponse
     this.state = {
+      userIsLoaded: false,
+      photoIsLoaded: false,
+      error: null,
+
       id: this.props.match.params.userId,
-      userModel: userModel,
-      first_name: userModel.first_name,
-      last_name: userModel.last_name,
-      description: userModel.description,
-      location: userModel.location,
-      occupation: userModel.occupation,
-      photoModel: photoModel,
-      onlyOnePhoto: (photoModel.length === 1)
+      userModel: null,
+      first_name: null,
+      last_name: null,
+      description: null,
+      location: null,
+      occupation: null,
+      
+      photoModel: null,
+      onlyOnePhoto: null
+    }
+
+    this.handleSuccess = this.handleSuccess.bind(this);
+    this.handleError = this.handleError.bind(this);
+  }
+  handleSuccess(value) {
+    //recall, fetchModel returns modelInfo in object.data property.
+    let isPhotos = value.data.length !== undefined;
+    if (isPhotos) {
+      this.setState( {
+        photoIsLoaded: true,
+        id: this.props.match.params.userId,
+        photoModel: value.data,
+        onlyOnePhoto: (value.data.length === 1),
+      } );
+    } else {
+      this.setState( {
+        userIsLoaded: true,
+        id: this.props.match.params.userId,
+        userModel: value.data,
+        first_name: value.data.first_name,
+        last_name: value.data.last_name,
+        description: value.data.description,
+        location: value.data.location,
+        occupation: value.data.occupation,
+      } );
     }
   }
-  updateId() {
-    this.id = this.props.match.params.userId;
-  }
-  queryDatabase() {
-    this.userModel = window.cs142models.userModel(this.id);
-    this.first_name = this.userModel.first_name;
-    this.last_name = this.userModel.last_name;
-    this.description = this.userModel.description;
-    this.location = this.userModel.location;
-    this.occupation = this.userModel.occupation;
+  handleError(error) {
+    this.setState( {
+      error: error
+    } );
   }
   getUserPhotos() {
+    const isLoaded = this.state.userIsLoaded;
+    const error = this.state.error;
+    if (error || !isLoaded) {
+      return;
+    }
+
     let imageElements = [];
     let keyId = 0;
     for (let image of this.state.userModel) {
-      console.log(image);
       imageElements.push(<img src={"images/"+image.file_name} key={keyId} />)
       keyId += 1;
     }
-    // console.log(imgSrc);
     return imageElements;
   }
   getGridListTiles() {
+    const isLoaded = this.state.photoIsLoaded;
+    const error = this.state.error;
+    if (error || !isLoaded) {
+      return;
+    }
+
     let gridTiles = []
     for (let image of this.state.photoModel) {
-      console.log(image.comments);
       let imageElem = <img src={"images/"+image.file_name} alt={image.file_name} />;
       let tileBarElem = <GridListTileBar title={`${image.file_name} (${image.date_time})`} />;
       let tileElem = <GridListTile key={image.file_name}>
@@ -102,6 +149,11 @@ class UserPhotos extends React.Component {
     return comments;
   }
   getCommentCards() {
+    const isLoaded = this.state.photoIsLoaded;
+    const error = this.state.error;
+    if (error || !isLoaded) {
+      return;
+    }
     let cards = []
     for (let image of this.state.photoModel) {
       let imageElem = <div className="userDetail-coverImageBox">
@@ -118,28 +170,30 @@ class UserPhotos extends React.Component {
     }
     return cards;
   }
+  componentDidMount() {
+    let currId = this.props.match.params.userId;
+    fetchModel("/user/" + currId).then(this.handleSuccess, this.handleError);
+    fetchModel("/photosOfUser/" + currId).then(this.handleSuccess, this.handleError);
+  }
   componentDidUpdate(prevProps) {
     let prevId = prevProps.match.params.userId;
     let currId = this.props.match.params.userId;
     if (prevId !== currId) {
-      let userModel = window.cs142models.userModel(currId);
-      let photoModel = window.cs142models.photoOfUserModel(currId);
-      this.setState({
-      id: this.props.match.params.userId,
-      userModel: userModel,
-      first_name: userModel.first_name,
-      last_name: userModel.last_name,
-      description: userModel.description,
-      location: userModel.location,
-      occupation: userModel.occupation,
-      photoModel: photoModel
-    });
+      fetchModel("/user/" + currId).then(this.handleSuccess, this.handleError);
+      fetchModel("/photosOfUser/" + currId).then(this.handleSuccess, this.handleError);
     }
   }
   render() {
+    const isLoaded = this.state.userIsLoaded;
+    const error = this.state.error;
+
+    let full_name = "";
+    if (isLoaded && !error) {
+      full_name = this.state.first_name+" "+this.state.last_name;
+    }
     return (
       <div className="userPhotos-root">
-        <h1 className="userPhotos-pageTitle">{this.state.first_name+" "+this.state.last_name}&apos;s Photo Gallery</h1>
+        <h1 className="userPhotos-pageTitle">{full_name}&apos;s Photo Gallery</h1>
         {
         //aesthetic grid list w.o. comments.
         (!this.state.onlyOnePhoto) && (<GridList cellHeight={180} className="userPhotos-gridList">

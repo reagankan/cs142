@@ -6,74 +6,108 @@ import './TopBar.css';
 import fetchModel from '../../lib/fetchModelData';
 
 /**
- * Define TopBar, a React componment of CS142 project #5
+ * Define TopBar, a React component of CS142 project #5
  */
 class TopBar extends React.Component {
   constructor(props) {
     super(props);
 
+    // Problem #2: use lib/fetchModel to interface XMLHttpResponse
     this.state = {
+      currUrl: this.props.match.url,
+
+      versionIsLoaded: false,
+      userIsLoaded: false,
+
       error: null,
-      isLoaded: false,
-      data: []
+
+      version: null,
+      userModel: null
     }
 
-    this.getSuccess = this.getSuccess.bind(this);
-    this.getError = this.getError.bind(this);
+    this.handleSuccess = this.handleSuccess.bind(this);
+    this.handleError = this.handleError.bind(this);
   }
-  getSuccess(value) {
+  handleSuccess(value) {
     //calls to setState will invoke render() again.
-    this.setState( {
-      isLoaded: true,
-      data: value.data
-    } );
-    // console.log("getSuccess():", value);
+    const isTestSchema = Object.keys(value.data).includes("__v");
+    if (isTestSchema) {
+      this.setState( {
+        versionIsLoaded: true,
+        version: value.data.__v
+      } );
+    } else {
+      this.setState( {
+        userIsLoaded: true,
+        userModel: value.data
+      } );
+    }
   }
-  getError(error) {
-    //calls to setState will invoke render() again.
+  handleError(error) {
     this.setState( {
-      isLoaded: true,
       error: error
     } );
   }
   componentDidMount() {
     // called after initial mount to DOM. Thus, only called once.
     // see React Component Lifecyle.
-    let fetchPromise = fetchModel("/test/info");
-    fetchPromise.then(this.getSuccess, this.getError);
-    // console.log("state.data DidMount:", this.state.data);
+    fetchModel("/test/info/").then(this.handleSuccess, this.handleError);
+
+    // fetch userModel.
+    let url = this.props.match.url;
+    let uIndex = url.search(/\/photos\//i);
+    let pIndex = url.search(/\/users\//i);
+    const atHomePage = (uIndex === -1 && pIndex === -1);
+
+    if (!atHomePage) {
+      const currId = url.substring(url.lastIndexOf("/")+1);
+      fetchModel("/user/" + currId).then(this.handleSuccess, this.handleError);
+    }
+  }
+  componentDidUpdate(prevProps) {
+    const prevUrl = prevProps.match.url;
+    const currUrl = this.props.match.url;
+
+    if (prevUrl !== currUrl) {
+      let uIndex = currUrl.search(/\/photos\//i);
+      let pIndex = currUrl.search(/\/users\//i);
+      const atHomePage = (uIndex === -1 && pIndex === -1);
+
+      if (!atHomePage) {
+        const currId = currUrl.substring(currUrl.lastIndexOf("/")+1);
+        fetchModel("/user/" + currId).then(this.handleSuccess, this.handleError);
+      } else {
+        //only userModel will change since testSchema.__v is hardcoded.
+        //single fetch from DidMount is enough. so no need to re-FETCH version number.
+      }
+    }
   }
   render() {
-    // verify render is called after setState invocation.
-    // console.log("render called");
-
     // get location info from url.
     let url = this.props.match.url;
     let uIndex = url.search(/\/photos\//i);
     let pIndex = url.search(/\/users\//i);
+    const atHomePage = (uIndex === -1 && pIndex === -1);
 
-    // check FETCH status.
-    const { error, isLoaded, data } = this.state;
-
-    // console.log(url);
-    // console.log(error, isLoaded, data);
-
-    // set context based on 1. url location 2. FETCH status.
     let context = "";
-    if (uIndex === -1 && pIndex === -1) {
+    if (atHomePage) {
+      const isLoaded = this.state.versionIsLoaded;
+      const error = this.state.error;
       if (error || !isLoaded) {
-          context = "Home Page";
+        context = "Home Page";
       } else {
-          // console.log("state.data render", data);
-          context = "Home Page " + data.__v;
+        context = "Home Page " + this.state.version;
       }
     } else {
-      let id = url.substring(url.lastIndexOf("/")+1);
-      let userModel = window.cs142models.userModel(id);
-      let first_name = userModel.first_name;
-      let last_name = userModel.last_name;
-      let name = first_name + " " + last_name;
-      context = (uIndex === -1) ? name : name + "'s Photos";
+      const isLoaded = this.state.userIsLoaded;
+      const error = this.state.error;
+      if (error || !isLoaded) {
+        //don't display anything for context.
+      } else {
+        let userModel = this.state.userModel;
+        let name = userModel.first_name + " " + userModel.last_name;
+        context = (uIndex === -1) ? name : name + "'s Photos";
+      }
     }
     
     return (
