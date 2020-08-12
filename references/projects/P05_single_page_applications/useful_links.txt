@@ -1,0 +1,8 @@
+
+Error when importing react-router-dom. Must have {} around imported modules.
+src: https://github.com/facebook/react/issues/12214
+
+
+
+React Router work on reload, but not when clicking on a link
+https://stackoverflow.com/questions/44356360/react-router-work-on-reload-but-not-when-clicking-on-a-link
