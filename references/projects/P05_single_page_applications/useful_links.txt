@@ -10,6 +10,7 @@ https://stackoverflow.com/questions/44356360/react-router-work-on-reload-but-not
 Detect change in Props
 Solution: check in componentDidUpdate.
 https://www.pluralsight.com/guides/prop-changes-in-react-component
+https://reactjs.org/docs/react-component.html#componentdidupdate
 
 Promises
 1. Solution
