@@ -27,7 +27,7 @@ class TopBar extends React.Component {
       isLoaded: true,
       data: value.data
     } );
-    console.log("getSuccess():", value);
+    // console.log("getSuccess():", value);
   }
   getError(error) {
     //calls to setState will invoke render() again.
@@ -41,11 +41,11 @@ class TopBar extends React.Component {
     // see React Component Lifecyle.
     let fetchPromise = fetchModel("/test/info");
     fetchPromise.then(this.getSuccess, this.getError);
-    console.log("state.data DidMount:", this.state.data);
+    // console.log("state.data DidMount:", this.state.data);
   }
   render() {
     // verify render is called after setState invocation.
-    console.log("render called");
+    // console.log("render called");
 
     // get location info from url.
     let url = this.props.match.url;
@@ -55,8 +55,8 @@ class TopBar extends React.Component {
     // check FETCH status.
     const { error, isLoaded, data } = this.state;
 
-    console.log(url);
-    console.log(error, isLoaded, data);
+    // console.log(url);
+    // console.log(error, isLoaded, data);
 
     // set context based on 1. url location 2. FETCH status.
     let context = "";
@@ -64,7 +64,7 @@ class TopBar extends React.Component {
       if (error || !isLoaded) {
           context = "Home Page";
       } else {
-          console.log("state.data render", data);
+          // console.log("state.data render", data);
           context = "Home Page " + data.__v;
       }
     } else {

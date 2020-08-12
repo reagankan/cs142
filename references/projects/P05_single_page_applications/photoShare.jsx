@@ -56,6 +56,9 @@ class PhotoShare extends React.Component {
               />
             
               <Route path="/users/:userId"
+                //use a render prop that sets the subcomponen(UserDetail) props
+                //to the component(Route) props.
+                //Thus passing the property: props.match to UserDetail.
                 render={ props => <UserDetail {...props} /> }
               />
               <Route path="/photos/:userId"

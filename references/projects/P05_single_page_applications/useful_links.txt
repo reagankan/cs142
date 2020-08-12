@@ -7,6 +7,9 @@ src: https://github.com/facebook/react/issues/12214
 React Router work on reload, but not when clicking on a link
 https://stackoverflow.com/questions/44356360/react-router-work-on-reload-but-not-when-clicking-on-a-link
 
+Detect change in Props
+Solution: check in componentDidUpdate.
+https://www.pluralsight.com/guides/prop-changes-in-react-component
 
 Promises
 1. Solution
@@ -25,3 +28,23 @@ https://stackoverflow.com/questions/30008114/how-do-i-promisify-native-xhr
 https://reactjs.org/docs/faq-ajax.html
 https://www.valentinog.com/blog/await-react/
 [import to fix runtime error]https://stackoverflow.com/questions/53558916/babel-7-referenceerror-regeneratorruntime-is-not-defined
+
+
+
+DeepLinking and Parameter Passing with React Router.
+Here is how UserDetail is created in photoShare.render();
+  <Route path="/users/:userId"
+    render={ props => <UserDetail {...props} /> }
+  />
+
+  from the React Router DOM docs
+  docs: https://reactrouter.com/web/api/Route/render-func
+  Instead of having a new React element created for you using the component prop, 
+  you can pass in a function to be called when the location matches.
+  The render prop function has access to all the same route props (match, location and history)
+  as the component render prop.
+
+  so this.props.match should contain the userId.
+  usage: (as in the cs142 SPA slide 10): {match.params.userId}
+
+  Now we can do: userModel(userId);

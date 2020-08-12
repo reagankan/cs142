@@ -7,21 +7,13 @@ import {
 import './userPhotos.css';
 
 
-// import { makeStyles } from '@material-ui/core/styles';
 import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import ListSubheader from '@material-ui/core/ListSubheader';
-// import IconButton from '@material-ui/core/IconButton';
-// import InfoIcon from '@material-ui/icons/Info';
 
 import Card from '@material-ui/core/Card';
-// import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-// import CardActionArea from '@material-ui/core/CardActionArea';
-// import CardMedia from '@material-ui/core/CardMedia';
-
-// import Button from '@material-ui/core/Button';
 
 
 /**
@@ -30,6 +22,21 @@ import CardContent from '@material-ui/core/CardContent';
 class UserPhotos extends React.Component {
   constructor(props) {
     super(props);
+
+    let userModel = window.cs142models.userModel(this.props.match.params.userId);
+    let photoModel = window.cs142models.photoOfUserModel(this.props.match.params.userId);
+
+    this.state = {
+      id: this.props.match.params.userId,
+      userModel: userModel,
+      first_name: userModel.first_name,
+      last_name: userModel.last_name,
+      description: userModel.description,
+      location: userModel.location,
+      occupation: userModel.occupation,
+      photoModel: photoModel,
+      onlyOnePhoto: (photoModel.length === 1)
+    }
   }
   updateId() {
     this.id = this.props.match.params.userId;
@@ -42,13 +49,10 @@ class UserPhotos extends React.Component {
     this.location = this.userModel.location;
     this.occupation = this.userModel.occupation;
   }
-  updateContext() {
-    window.cs142models.context = "Photos of " + this.first_name + " " + this.last_name;
-  }
   getUserPhotos() {
     let imageElements = [];
     let keyId = 0;
-    for (let image of window.cs142models.photoOfUserModel(this.id)) {
+    for (let image of this.state.userModel) {
       console.log(image);
       imageElements.push(<img src={"images/"+image.file_name} key={keyId} />)
       keyId += 1;
@@ -58,7 +62,7 @@ class UserPhotos extends React.Component {
   }
   getGridListTiles() {
     let gridTiles = []
-    for (let image of window.cs142models.photoOfUserModel(this.id)) {
+    for (let image of this.state.photoModel) {
       console.log(image.comments);
       let imageElem = <img src={"images/"+image.file_name} alt={image.file_name} />;
       let tileBarElem = <GridListTileBar title={`${image.file_name} (${image.date_time})`} />;
@@ -99,7 +103,7 @@ class UserPhotos extends React.Component {
   }
   getCommentCards() {
     let cards = []
-    for (let image of window.cs142models.photoOfUserModel(this.id)) {
+    for (let image of this.state.photoModel) {
       let imageElem = <div className="userDetail-coverImageBox">
               <img className="userDetail-coverImage" src={"images/"+image.file_name}></img>
             </div>;
@@ -114,18 +118,31 @@ class UserPhotos extends React.Component {
     }
     return cards;
   }
+  componentDidUpdate(prevProps) {
+    let prevId = prevProps.match.params.userId;
+    let currId = this.props.match.params.userId;
+    if (prevId !== currId) {
+      let userModel = window.cs142models.userModel(currId);
+      let photoModel = window.cs142models.photoOfUserModel(currId);
+      this.setState({
+      id: this.props.match.params.userId,
+      userModel: userModel,
+      first_name: userModel.first_name,
+      last_name: userModel.last_name,
+      description: userModel.description,
+      location: userModel.location,
+      occupation: userModel.occupation,
+      photoModel: photoModel
+    });
+    }
+  }
   render() {
-    this.updateId(); //this is important. without, page won't update.
-    this.queryDatabase();
-    this.updateContext();
-
-    let onlyOnePhoto = window.cs142models.photoOfUserModel(this.id).length === 1;
     return (
       <div className="userPhotos-root">
-        <h1 className="userPhotos-pageTitle">{this.first_name+" "+this.last_name}&apos;s Photo Gallery</h1>
+        <h1 className="userPhotos-pageTitle">{this.state.first_name+" "+this.state.last_name}&apos;s Photo Gallery</h1>
         {
         //aesthetic grid list w.o. comments.
-        (!onlyOnePhoto) && (<GridList cellHeight={180} className="userPhotos-gridList">
+        (!this.state.onlyOnePhoto) && (<GridList cellHeight={180} className="userPhotos-gridList">
           <GridListTile key="Subheader" cols={2} style={{ height: 'auto' }}>
             <ListSubheader component="div" style={{color: 'white'}}>
               A Quick Photo Overview
