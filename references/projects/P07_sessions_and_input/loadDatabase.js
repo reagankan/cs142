@@ -4,7 +4,7 @@
 /* global Promise */
 
 /*
- * This Node.js program loads the CS142 Project #5 model data into Mongoose defined objects
+ * This Node.js program loads the CS142 Project #7 model data into Mongoose defined objects
  * in a MongoDB database. It can be run with the command:
  *     node loadDatabase.js
  * be sure to have an instance of the MongoDB running on the localhost.
@@ -45,14 +45,16 @@ Promise.all(removePromises).then(function () {
     // later in the script.
 
     var userModels = cs142models.userListModel();
-    var mapFakeId2RealId = {};
+    var mapFakeId2RealId = {}; // Map from fake id to real Mongo _id
     var userPromises = userModels.map(function (user) {
         return User.create({
             first_name: user.first_name,
             last_name: user.last_name,
             location: user.location,
             description: user.description,
-            occupation: user.occupation
+            occupation: user.occupation,
+            login_name: user.last_name.toLowerCase(),
+            password: 'weak'
         }).then(function (userObj) {
             // Set the unique ID of the object. We use the MongoDB generated _id for now
             // but we keep it distinct from the MongoDB ID so we can go to something
@@ -61,8 +63,8 @@ Promise.all(removePromises).then(function () {
             mapFakeId2RealId[user._id] = userObj._id;
             user.objectID = userObj._id;
             console.log('Adding user:', user.first_name + ' ' + user.last_name, ' with ID ',
-                    user.objectID);
-        }).catch(function(err){
+                user.objectID);
+        }).catch(function (err){
             console.error('Error create user', err);
         });
     });
@@ -107,8 +109,8 @@ Promise.all(removePromises).then(function () {
             return SchemaInfo.create({
                 version: versionString
             }).then(function (schemaInfo) {
-                console.log('SchemaInfo object created with version ', schemaInfo.version);
-            }).catch(function(err){
+                console.log('SchemaInfo object ', schemaInfo, ' created with version ', versionString);
+            }).catch(function (err){
                 console.error('Error create schemaInfo', err);
             });
         });
