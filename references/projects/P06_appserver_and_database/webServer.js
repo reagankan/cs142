@@ -45,7 +45,7 @@ var express = require('express');
 var app = express();
 
 // XXX - Your submission should work without this line. Comment out or delete this line for tests and before submission!
-var cs142models = require('./modelData/photoApp.js').cs142models;
+
 
 mongoose.connect('mongodb://localhost/cs142project6', { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -130,7 +130,34 @@ app.get('/test/:p1', function (request, response) {
  * URL /user/list - Return all the User object.
  */
 app.get('/user/list', function (request, response) {
-    response.status(200).send(cs142models.userListModel());
+    User.find({}, function(err, users) {
+        if (err) {
+            // Query returned an error.  We pass it back to the browser with an Internal Service
+            // Error (500) error code.
+            console.error('Doing /user/list error:', err);
+            response.status(500).send(JSON.stringify(err));
+            return;
+        }
+        if (users.length === 0) {
+            // Query didn't return an error but didn't find the SchemaInfo object - This
+            // is also an internal error return.
+            response.status(500).send('Missing UserList');
+            return;
+        }
+
+        // remove Mongoose schema restrictions.
+        for (let i = 0; i < users.length; i++) {
+            users[i] = JSON.parse(JSON.stringify(users[i]));
+            // setup user property according to fetch API.
+            delete users[i].location;
+            delete users[i].description;
+            delete users[i].occupation;
+            delete users[i].__v;
+        }
+        
+        console.log('/user/list::num_users_retrieved: ', users.length);
+        response.status(200).end(JSON.stringify(users));
+    });
 });
 
 /*
@@ -138,13 +165,34 @@ app.get('/user/list', function (request, response) {
  */
 app.get('/user/:id', function (request, response) {
     var id = request.params.id;
-    var user = cs142models.userModel(id);
-    if (user === null) {
-        console.log('User with _id:' + id + ' not found.');
-        response.status(400).send('Not found');
-        return;
-    }
-    response.status(200).send(user);
+    User.findOne({_id: id}, function(err, user) {
+        if (err) {
+            if (user === undefined) {
+                console.error('/user/' + id, '::invalid_user_detected_error: ', err);
+                response.status(400).send(JSON.stringify(err));
+                return;
+            }
+            // Query returned an error.  We pass it back to the browser with an Internal Service
+            // Error (500) error code.
+            console.error('Doing /user/' + id, err);
+            response.status(500).send(JSON.stringify(err));
+            return;
+        }
+
+        if (user === null) {
+            console.log('User with _id:' + id + ' not found.', user);
+            response.status(400).send('Not found');
+            return;
+        }
+        // remove Mongoose schema restrictions.
+        let convertedUser = JSON.parse(JSON.stringify(user));
+
+        // setup user property according to fetch API.
+        delete convertedUser.__v;
+
+        console.log('/user/', convertedUser._id + "/::full_name: " + convertedUser.first_name + " " + convertedUser.last_name);
+        response.status(200).end(JSON.stringify(convertedUser));
+    });
 });
 
 /*
@@ -152,13 +200,51 @@ app.get('/user/:id', function (request, response) {
  */
 app.get('/photosOfUser/:id', function (request, response) {
     var id = request.params.id;
-    var photos = cs142models.photoOfUserModel(id);
-    if (photos.length === 0) {
-        console.log('Photos for user with _id:' + id + ' not found.');
-        response.status(400).send('Not found');
-        return;
-    }
-    response.status(200).send(photos);
+    //NOTE user_id === Mongo Id of User Schema.
+    //Note _id is the Mongo Id of the Photo Schema.
+    Photo.find({user_id: id}, async function(err, photos) {
+        if (err) {
+            if (photos === undefined) {
+                console.error('/photosOfUser/' + id, '::invalid_user_detected_error: ', err);
+                response.status(400).send(JSON.stringify(err));
+                return;
+            }
+            // Query returned an error.  We pass it back to the browser with an Internal Service
+            // Error (500) error code.
+            console.error('Doing /photosOfUser/' + id, ' error:', err);
+            response.status(500).send(JSON.stringify(err));
+            return;
+        }
+
+        if (photos === null) {
+            console.log('photosOfUser with _id:' + id + ' not found.', photos);
+            response.status(400).send('Not found');
+            return;
+        }
+
+        for (let i = 0; i < photos.length; i++) {
+            // remove Mongoose schema restrictions.
+            photos[i] = JSON.parse(JSON.stringify(photos[i]));
+            photos[i].comments = JSON.parse(JSON.stringify(photos[i].comments));
+
+            // setup photos and photos.comments property according to fetch API.
+            delete photos[i].__v;
+            for (let j = 0; j < photos[i].comments.length; j++) {
+                let commenter = await User.findById(photos[i].comments[j].user_id).exec();
+                photos[i].comments[j].user = {
+                    _id: photos[i].comments[j].user_id,
+                    first_name: commenter.first_name,
+                    last_name: commenter.last_name,
+                };
+                delete photos[i].comments[j].user_id;
+            }
+        }
+        // remove Mongoose schema restrictions.
+        let convertedPhotos = JSON.parse(JSON.stringify(photos));
+
+        console.log('/photosOfUser/' + id + "::num_photos: ", photos.length);
+        response.status(200).end(JSON.stringify(convertedPhotos));
+    });
 });
 
 
