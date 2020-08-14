@@ -15,7 +15,7 @@ import './userList.css';
 // so all imports must follow a similar import way.
 import {Link} from 'react-router-dom';
 
-import fetchModel from '../../lib/fetchModelData';
+import axios from 'axios';
 
 /**
  * Define UserList, a React componment of CS142 project #5
@@ -30,7 +30,8 @@ class UserList extends React.Component {
     //   userListModel: userListModel
     // }
 
-    // Problem #2: use lib/fetchModel to interface XMLHttpResponse
+    // Project 5, Problem #2: use lib/fetchModel to interface XMLHttpResponse
+    // Project 6, Problem #2: use axios ... 
     this.state = {
       error: null,
       isLoaded: false,
@@ -70,6 +71,7 @@ class UserList extends React.Component {
     return <List component="nav"> {listContent} </List>
   }
   handleSuccess(value) {
+    console.log(value);
     this.setState( {
       isLoaded: true,
       userListModel: value.data //recall, fetchModel returns modelInfo in object.data property.
@@ -82,8 +84,8 @@ class UserList extends React.Component {
     } );
   }
   componentDidMount() {
-    let promise = fetchModel("/user/list");
-    promise.then(this.handleSuccess, this.handleError);
+    // use axios. faster wrapper around XMLHttpRequest
+    axios.get("/user/list").then(this.handleSuccess).catch(this.handleError);
   }
   render() {
     return (

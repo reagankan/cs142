@@ -3,7 +3,9 @@ import {
   AppBar, Toolbar, Typography
 } from '@material-ui/core';
 import './TopBar.css';
-import fetchModel from '../../lib/fetchModelData';
+
+import axios from 'axios';
+
 
 /**
  * Define TopBar, a React component of CS142 project #5
@@ -12,7 +14,8 @@ class TopBar extends React.Component {
   constructor(props) {
     super(props);
 
-    // Problem #2: use lib/fetchModel to interface XMLHttpResponse
+    // Project 5, Problem #2: use lib/fetchModel to interface XMLHttpResponse
+    // Project 6, Problem #2: use axios ... 
     this.state = {
       currUrl: this.props.match.url,
 
@@ -51,7 +54,7 @@ class TopBar extends React.Component {
   componentDidMount() {
     // called after initial mount to DOM. Thus, only called once.
     // see React Component Lifecyle.
-    fetchModel("/test/info/").then(this.handleSuccess, this.handleError);
+    axios.get("/test/info/").then(this.handleSuccess).catch(this.handleError);
 
     // fetch userModel.
     let url = this.props.match.url;
@@ -61,7 +64,7 @@ class TopBar extends React.Component {
 
     if (!atHomePage) {
       const currId = url.substring(url.lastIndexOf("/")+1);
-      fetchModel("/user/" + currId).then(this.handleSuccess, this.handleError);
+      axios.get("/user/" + currId).then(this.handleSuccess).catch(this.handleError);
     }
   }
   componentDidUpdate(prevProps) {
@@ -75,7 +78,7 @@ class TopBar extends React.Component {
 
       if (!atHomePage) {
         const currId = currUrl.substring(currUrl.lastIndexOf("/")+1);
-        fetchModel("/user/" + currId).then(this.handleSuccess, this.handleError);
+        axios.get("/user/" + currId).then(this.handleSuccess).catch(this.handleError);
       } else {
         //only userModel will change since testSchema.__v is hardcoded.
         //single fetch from DidMount is enough. so no need to re-FETCH version number.

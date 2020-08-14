@@ -15,7 +15,8 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 
-import fetchModel from '../../lib/fetchModelData';
+import axios from 'axios';
+
 /**
  * Define UserPhotos, a React componment of CS142 project #5
  */
@@ -38,7 +39,8 @@ class UserPhotos extends React.Component {
     //   onlyOnePhoto: (photoModel.length === 1)
     // }
 
-    // Problem #2: use lib/fetchModel to interface XMLHttpResponse
+    // Project 5, Problem #2: use lib/fetchModel to interface XMLHttpResponse
+    // Project 6, Problem #2: use axios ... 
     this.state = {
       userIsLoaded: false,
       photoIsLoaded: false,
@@ -172,15 +174,19 @@ class UserPhotos extends React.Component {
   }
   componentDidMount() {
     let currId = this.props.match.params.userId;
-    fetchModel("/user/" + currId).then(this.handleSuccess, this.handleError);
-    fetchModel("/photosOfUser/" + currId).then(this.handleSuccess, this.handleError);
+
+    // use axios. faster wrapper around XMLHttpRequest
+    axios.get("/user/" + currId).then(this.handleSuccess).catch(this.handleError);
+    axios.get("/photosOfUser/" + currId).then(this.handleSuccess).catch(this.handleError);
   }
   componentDidUpdate(prevProps) {
     let prevId = prevProps.match.params.userId;
     let currId = this.props.match.params.userId;
     if (prevId !== currId) {
-      fetchModel("/user/" + currId).then(this.handleSuccess, this.handleError);
-      fetchModel("/photosOfUser/" + currId).then(this.handleSuccess, this.handleError);
+
+      // use axios. faster wrapper around XMLHttpRequest
+      axios.get("/user/" + currId).then(this.handleSuccess).catch(this.handleError);
+      axios.get("/photosOfUser/" + currId).then(this.handleSuccess).catch(this.handleError);
     }
   }
   render() {

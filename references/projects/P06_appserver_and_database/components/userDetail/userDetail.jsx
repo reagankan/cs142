@@ -11,7 +11,8 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 
-import fetchModel from '../../lib/fetchModelData';
+import axios from 'axios';
+
 
 
 /**
@@ -35,7 +36,8 @@ class UserDetail extends React.Component {
     //   photoModel: photoModel
     // }
 
-    // Problem #2: use lib/fetchModel to interface XMLHttpResponse
+    // Project 5, Problem #2: use lib/fetchModel to interface XMLHttpResponse
+    // Project 6, Problem #2: use axios ... 
     this.state = {
       userIsLoaded: false,
       photoIsLoaded: false,
@@ -69,7 +71,7 @@ class UserDetail extends React.Component {
     return (idx < imagePaths.length) ? imagePaths[idx] : imagePaths[0];
   }
   handleSuccess(value) {
-    //recall, fetchModel returns modelInfo in object.data property.
+    //recall, fetchModel/axios.get() returns modelInfo in object.data property.
     let isPhotos = value.data.length !== undefined;
     if (isPhotos) {
       this.setState( {
@@ -97,15 +99,18 @@ class UserDetail extends React.Component {
   }
   componentDidMount() {
     let currId = this.props.match.params.userId;
-    fetchModel("/user/" + currId).then(this.handleSuccess, this.handleError);
-    fetchModel("/photosOfUser/" + currId).then(this.handleSuccess, this.handleError);
+
+    // use axios. faster wrapper around XMLHttpRequest
+    axios.get("/user/" + currId).then(this.handleSuccess).catch(this.handleError);
+    axios.get("/photosOfUser/" + currId).then(this.handleSuccess).catch(this.handleError);
   }
   componentDidUpdate(prevProps) {
     let prevId = prevProps.match.params.userId;
     let currId = this.props.match.params.userId;
     if (prevId !== currId) {
-      fetchModel("/user/" + currId).then(this.handleSuccess, this.handleError);
-      fetchModel("/photosOfUser/" + currId).then(this.handleSuccess, this.handleError);
+      // use axios. faster wrapper around XMLHttpRequest
+      axios.get("/user/" + currId).then(this.handleSuccess).catch(this.handleError);
+      axios.get("/photosOfUser/" + currId).then(this.handleSuccess).catch(this.handleError);
     }
   }
   render() {
