@@ -1,0 +1,49 @@
+Running the Web App
+	1. npm run nodemon :- actively monitors server code
+	2. np run build:w :- webpack actively monitors React components & bundles if changes occur.
+	3. combine both with: npm run nodemon & npm run build:w
+	Note: only option #1 is needed. This project only pertains to server code, and use project 5 ReactUI code to test it!
+
+Running the Test Suite
+	1. launch mongoDB
+		mongod --config /usr/local/etc/mongod.conf --fork
+	2. load in data
+		node loadDatabase.js
+	3. launch webServer
+		node webServer.js or npm run nodemon
+	4. run tests
+		cd test
+		npm test
+
+MongoDB: brew install []
+Usage
+	mongod --config /usr/local/etc/mongod.conf --fork
+	ps aux | grep -v grep | grep mongod
+	node loadDatabase.js
+Install Output
+	(base) Reagans-MacBook-Pro-3:P06_appserver_and_database reagankan$ brew install mongodb-community@4.4
+	Updating Homebrew...
+	^C==> Installing mongodb-community from mongodb/brew
+	==> Downloading https://fastdl.mongodb.org/osx/mongodb-macos-x86_64-4.4.0.tgz
+	Already downloaded: /Users/reagankan/Library/Caches/Homebrew/downloads/bc3baa1e200144436b811c4951ca047b06b784930e83dc66a4554bfa0d2a13e2--mongodb-macos-x86_64-4.4.0.tgz
+	==> Caveats
+	To have launchd start mongodb/brew/mongodb-community now and restart at login:
+	  brew services start mongodb/brew/mongodb-community
+	Or, if you don't want/need a background service you can just run:
+	  mongod --config /usr/local/etc/mongod.conf
+	==> Summary
+	🍺  /usr/local/Cellar/mongodb-community/4.4.0: 11 files, 136.7MB, built in 5 seconds
+
+
+NodeMon
+Install
+	1. npm install --save-dev nodemon
+	2. add this line to package.json: "nodemon": "node_modules/.bin/nodemon webServer.js"
+	3. npm run nodemon
+	src: https://stackoverflow.com/questions/56687560/how-to-install-nodemon-nodejs-on-macos-nodemon-keeping-show-command-not-found
+	src: https://www.npmjs.com/package/nodemon
+	Note: don't use -g flag. Don't have permission. 
+	See: /Users/reagankan/.npm/_logs/2020-08-12T23_47_49_693Z-debug.log)
+
+Axios
+Slide 11: https://web.stanford.edu/class/cs142/lectures/ServerCom.pdf
