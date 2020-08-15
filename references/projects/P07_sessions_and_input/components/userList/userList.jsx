@@ -17,12 +17,17 @@ import {Link} from 'react-router-dom';
 
 import axios from 'axios';
 
+import {LoginContext} from '../loginContext/LoginContext';
+
 /**
  * Define UserList, a React componment of CS142 project #5
  */
 class UserList extends React.Component {
-  constructor(props) {
+  static contextType = LoginContext;
+  constructor(props, context) {
     super(props);
+    this.context = context;
+    // console.log("UserList::constructor: context", this.context);
 
     // Problem #1: use window.cs142models hack for server.
     // let userListModel = window.cs142models.userListModel();
@@ -46,6 +51,7 @@ class UserList extends React.Component {
     const { error, isLoaded, userListModel } = this.state;
 
     if (error || !isLoaded) {
+      // console.log("getList Model not loaded.", error, isLoaded);
       return;
     }
 
@@ -68,26 +74,41 @@ class UserList extends React.Component {
       listContent.push(<Link to={path} key={itemId}> {listItem} {divider} </Link>);
       itemId += 1;
     }
+    // console.log("UserList::getList::listContent", listContent.length, listContent);
     return <List component="nav"> {listContent} </List>
   }
   handleSuccess(value) {
-    console.log(value);
+    // console.log("UserList::Success: ", value);
     this.setState( {
       isLoaded: true,
-      userListModel: value.data //recall, fetchModel returns modelInfo in object.data property.
+      userListModel: value.data, //recall, fetchModel returns modelInfo in object.data property.
+      error: null,
     } );
   }
   handleError(error) {
+    // console.log("UserList::Error: ", error);
     this.setState( {
       isLoaded: true,
       error: error
     } );
   }
   componentDidMount() {
-    // use axios. faster wrapper around XMLHttpRequest
-    axios.get("/user/list").then(this.handleSuccess).catch(this.handleError);
+    if (this.context) {
+      // use axios. faster wrapper around XMLHttpRequest
+      axios.get("/user/list").then(this.handleSuccess).catch(this.handleError);  
+    }
+  }
+  componentDidUpdate(prevProps) {
+    //DidMount is no longer sufficient by itself. 
+    //UserLIit is mounted before login.
+    // let prevId = prevProps.match.params.userId;
+    // let currId = this.props.match.params.userId;
+    if (prevProps !== this.props) {
+      axios.get("/user/list").then(this.handleSuccess).catch(this.handleError); 
+    }
   }
   render() {
+    // console.log("UserList::render::this.context", this.context, this.state.isLoaded, this.state.userListModel);
     return (
       <div>
         

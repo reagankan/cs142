@@ -4,6 +4,8 @@ import {
 } from '@material-ui/core';
 import './TopBar.css';
 
+import {LoginContext} from '../loginContext/LoginContext';
+
 import axios from 'axios';
 
 
@@ -11,8 +13,15 @@ import axios from 'axios';
  * Define TopBar, a React component of CS142 project #5
  */
 class TopBar extends React.Component {
-  constructor(props) {
+  static contextType = LoginContext;
+  constructor(props, context) {
+    //WEIRD!! https://github.com/facebook/react/issues/6598
+    //this.context is only available in React version 16.3.0+
+    // also only in LIFECYCLE methods. which does NOT include the constructor.
     super(props);
+
+    this.context = context;
+    console.log("TopBar::constructor:context: ", this.context, context, React.version);
 
     // Project 5, Problem #2: use lib/fetchModel to interface XMLHttpResponse
     // Project 6, Problem #2: use axios ... 
@@ -30,6 +39,8 @@ class TopBar extends React.Component {
 
     this.handleSuccess = this.handleSuccess.bind(this);
     this.handleError = this.handleError.bind(this);
+
+    this.handleLogout = this.handleLogout.bind(this);
   }
   handleSuccess(value) {
     //calls to setState will invoke render() again.
@@ -51,20 +62,27 @@ class TopBar extends React.Component {
       error: error
     } );
   }
+  handleLogout() {
+    console.log("Logging user out!!!");
+    axios.post("/admin/logout");
+    this.props.parentCallback(null);
+  }
   componentDidMount() {
     // called after initial mount to DOM. Thus, only called once.
     // see React Component Lifecyle.
     axios.get("/test/info/").then(this.handleSuccess).catch(this.handleError);
 
-    // fetch userModel.
-    let url = this.props.match.url;
-    let uIndex = url.search(/\/photos\//i);
-    let pIndex = url.search(/\/users\//i);
-    const atHomePage = (uIndex === -1 && pIndex === -1);
+    if (this.context) {
+      // fetch userModel.
+      let url = this.props.match.url;
+      let uIndex = url.search(/\/photos\//i);
+      let pIndex = url.search(/\/users\//i);
+      const atHomePage = (uIndex === -1 && pIndex === -1);
 
-    if (!atHomePage) {
-      const currId = url.substring(url.lastIndexOf("/")+1);
-      axios.get("/user/" + currId).then(this.handleSuccess).catch(this.handleError);
+      if (!atHomePage) {
+        const currId = url.substring(url.lastIndexOf("/")+1);
+        axios.get("/user/" + currId).then(this.handleSuccess).catch(this.handleError);
+      }
     }
   }
   componentDidUpdate(prevProps) {
@@ -77,8 +95,10 @@ class TopBar extends React.Component {
       const atHomePage = (uIndex === -1 && pIndex === -1);
 
       if (!atHomePage) {
-        const currId = currUrl.substring(currUrl.lastIndexOf("/")+1);
-        axios.get("/user/" + currId).then(this.handleSuccess).catch(this.handleError);
+        if (this.context) {
+          const currId = currUrl.substring(currUrl.lastIndexOf("/")+1);
+          axios.get("/user/" + currId).then(this.handleSuccess).catch(this.handleError);
+        }
       } else {
         //only userModel will change since testSchema.__v is hardcoded.
         //single fetch from DidMount is enough. so no need to re-FETCH version number.
@@ -109,7 +129,7 @@ class TopBar extends React.Component {
       } else {
         let userModel = this.state.userModel;
         let name = userModel.first_name + " " + userModel.last_name;
-        context = (uIndex === -1) ? name : name + "'s Photos";
+        context = (uIndex === -1) ? "Hi, " + name : name + "'s Photos";
       }
     }
     
@@ -120,11 +140,20 @@ class TopBar extends React.Component {
             Reagan Kan&apos;s FB
           </Typography>
 
-          <Typography variant="h5" color="inherit" className="cs142-topbar-flexitem context">
+          <div className="cs142-topbar-flexitem context">
+          <Typography variant="h5" color="inherit">
             {
-              context
+              this.context ? context : "Please Login"
             }
           </Typography>
+
+
+          <Typography className="cs142-topbar-logout" onClick={this.handleLogout}>
+            {
+              this.context ? "logout" : ""
+            }
+          </Typography>
+          </div>
         </Toolbar>
       </AppBar>
     );

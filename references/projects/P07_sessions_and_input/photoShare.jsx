@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {
-  HashRouter, Route, Switch
+  HashRouter, Route, Switch, Redirect
 } from 'react-router-dom';
 import {
-  Grid, Typography, Paper
+  Grid, Paper
 } from '@material-ui/core';
 import './styles/main.css';
 
@@ -13,63 +13,96 @@ import TopBar from './components/topBar/TopBar';
 import UserDetail from './components/userDetail/UserDetail';
 import UserList from './components/userList/UserList';
 import UserPhotos from './components/userPhotos/UserPhotos';
+import LoginRegister from './components/loginRegister/LoginRegister';
+import {LoginContext} from './components/loginContext/LoginContext';
 
 class PhotoShare extends React.Component {
-  constructor(props) {
+  static contextType = LoginContext;
+  constructor(props, context) {
     super(props);
-  }
 
+    this.state = {
+      currentUser: context
+    }
+
+    this.parentCallback = this.parentCallback.bind(this);
+  }
+  componentDidMount() {
+    this.setState({
+      currentUser: this.context
+    })
+  }
+  parentCallback(fromChild) {
+    // console.log("FROM CHILD: ", fromChild);
+    this.setState({
+      currentUser: fromChild
+    })
+  }
   render() {
+    // console.log("PhotoShare::render::this.state.currentUser: ", this.state.currentUser);
     return (
+      <LoginContext.Provider value={this.state.currentUser}>
       <HashRouter>
-      <div>
-      <Grid container spacing={8}>
-        <Grid item xs={12}>
-          <Route path="/*"
-                render={ props => <TopBar {...props} /> }
-          />
-        </Grid>
-        <div className="cs142-main-topbar-buffer"/>
-        <Grid item sm={3}>
-          <Paper  className="cs142-main-grid-item">
-            <UserList />
-          </Paper>
-        </Grid>
-        <Grid item sm={9}>
-          <Paper className="cs142-main-grid-item">
-            <Switch>
-            
-            <Route exact path="/"
-                render={() =>
-                  <Typography variant="body1" component="h1">
-                  Welcome to your photosharing app! This <a href="https://material-ui.com/demos/paper/">Paper</a> component
-                  displays the main content of the application. The {"sm={9}"} prop in
-                  the <a href="https://material-ui.com/layout/grid/">Grid</a> item component makes it responsively
-                  display 9/12 of the window. The Switch component enables us to conditionally render different
-                  components to this part of the screen. You don&apos;t need to display anything here on the homepage,
-                  so you should delete this Route component once you get started.
-                  <br/><br/>
-                  ...But I&apos;m keeping it! This is Project #5: Single Page Applications.
-                  </Typography>
+        <div>
+          <Grid container spacing={8}>
+            <Grid item xs={12}>\
+              <Route path="/*"
+                    render={
+                      (props) => {
+                        props.parentCallback = this.parentCallback;
+                        return <TopBar {...props} />; 
+                      }
+                    }
+              />
+            </Grid>
+            <div className="cs142-main-topbar-buffer"/>
+            <Grid item sm={3}>
+              <Paper  className="cs142-main-grid-item">
+                {
+                  this.state.currentUser && <UserList />
                 }
-              />
-            
-              <Route path="/users/:userId"
-                //use a render prop that sets the subcomponen(UserDetail) props
-                //to the component(Route) props.
-                //Thus passing the property: props.match to UserDetail.
-                render={ props => <UserDetail {...props} /> }
-              />
-              <Route path="/photos/:userId"
-                render ={ props => <UserPhotos {...props} /> }
-              />
-              <Route path="/users" component={UserList}  />
-            </Switch>
-          </Paper>
-        </Grid>
-      </Grid>
-      </div>
-    </HashRouter>
+              </Paper>
+            </Grid>
+            <Grid item sm={9}>
+              <Paper className="cs142-main-grid-item">
+                <Switch>
+                <React.Fragment> 
+                {
+                  this.state.currentUser ?
+                  (
+                    <div>
+                    <Route path="/users/:userId"
+                      render={ props => <UserDetail {...props} /> }
+                    />
+                    <Route path="/photos/:userId"
+                      render ={ props => <UserPhotos {...props} /> }
+                    />
+                    </div>
+                  )
+                  :
+                  <Redirect path="/*" to="/login-register/login"/>
+                }
+                {
+                  this.state.currentUser ?
+                  <Redirect path="/login-register/login" to={"/users/" + this.state.currentUser._id} />
+                  :
+                  <Route path="/login-register/:mode"
+                    render={
+                      (props) => {
+                        props.parentCallback = this.parentCallback;
+                        return <LoginRegister {...props} />; 
+                      }
+                    }
+                  />
+                }
+                </React.Fragment>
+                </Switch>
+              </Paper>
+            </Grid>
+          </Grid>
+        </div>
+      </HashRouter>
+      </LoginContext.Provider>
     );
   }
 }

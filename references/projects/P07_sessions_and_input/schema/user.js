@@ -8,11 +8,15 @@ var mongoose = require('mongoose');
 
 // create a schema
 var userSchema = new mongoose.Schema({
+	//project 6
     first_name: String, // First name of the user.
     last_name: String,  // Last name of the user.
     location: String,    // Location  of the user.
     description: String,  // A brief user description
-    occupation: String    // Occupation of the user.
+    occupation: String,    // Occupation of the user.
+
+    //project 7
+    login_name: String,
 });
 
 // the schema is useless so far

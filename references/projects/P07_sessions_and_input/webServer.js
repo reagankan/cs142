@@ -31,6 +31,16 @@
  *
  */
 
+/*Add these 3 modules for project 7*/
+// ExpressJS has a middleware layer for dealing with the session state
+// ○ Stores a sessionID safely in a cookie
+// ○ Store session state in a session state store
+// ○ Like Rails, handles creation and fetching of session state for your request handlers
+// from Sessions slide 11.
+var session = require('express-session');
+var bodyParser = require('body-parser');
+var multer = require('multer');
+
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 
@@ -53,11 +63,83 @@ mongoose.connect('mongodb://localhost/cs142project6', { useNewUrlParser: true, u
 // the work for us.
 app.use(express.static(__dirname));
 
+//add middleware for project 7
+app.use(session({secret: 'secretKey', resave: false, saveUninitialized: false}));  //for ecrypt session cookie later.
+app.use(bodyParser.json());
+
 
 app.get('/', function (request, response) {
     response.send('Simple web server of files from ' + __dirname);
 });
 
+/*
+    Project 7::Problem 1: get(/admin/login), a REST API called by LoginRegister component.
+    /admin/login: Provides a way for the photo app's LoginRegister view to login in a user.
+        - The POST request JSON-encoded body should include a property login_name (no passwords for now)
+            and reply with information needed by your app for logged in user.
+        - An HTTP status of 400 (Bad request) should be returned if the login failed
+            (e.g. login_name is not a valid account).
+        - A parameter in the request body is accessed using request.body.parameter_name.
+            Note the login register handler should ensure that there exists a user
+            with the given login_name. If so, it stores some information in the Express
+            session where it can be checked by other request handlers that need to know
+            whether a user is logged in.
+ */
+app.post('/admin/login', async function (request, response) {
+    console.log('/admin/login called with login user: ', request.body.login_name);
+
+    let user = await User.findOne({login_name: request.body.login_name}).exec();
+    if (user === null) {
+        response.status(400).send("User not found: " + request.body.login_name); //send = write/end
+    }
+
+    request.session.userIsLoggedIn = true; //add isLoggedIn flag to cookie.
+    request.session.login_name = request.body.login_name;
+    console.log("POST(/admin/login)::express session state: ", request.session);
+
+    //here since valid login_name provided in request.
+    //OK to store session state in PhotoShare component state
+    //src::slide11:https://web.stanford.edu/class/cs142/lectures/StateManagement.pdf
+    //
+    //...so, need to respond with boolean flag userIsLoggedIn.
+    response.status(200).send(JSON.stringify(user));
+});
+/*
+Project 7::Problem 1: /admin/logout
+    /admin/logout
+        - A POST request with an empty body to this URL will logout the user by clearing
+          the information stored in the session.
+        - An HTTP status of 400 (Bad request) should be returned in the user
+          is not currently logged in.
+*/
+app.post('/admin/logout', function (request, response) {
+    console.log('/admin/logout called with login user: ', request.session.login_name);
+
+    if (!request.session.userIsLoggedIn) {
+        let err_msg = '/admin/logout error::cannot_logout:' + request.session.login_name + " was never logged in.";
+        console.log(err_msg);
+        response.status(400).send(JSON.stringify(err_msg));
+        return;
+    }
+
+    //save login name before session is destroyed
+    let login_name = request.session.login_name;
+
+    //destroy session
+    request.session.destroy(function (err) { 
+        if (err) {
+            let err_msg = "/admin/logout error::cookie_destroy_failed: " + JSON.stringify(err);
+            console.log(err_msg);
+            response.status(500).send(err_msg);
+            return;
+        }
+    });
+
+    //respond with success.
+    let msg = "admin/logout::success: " + login_name + " is logged out.";
+    console.log(msg);
+    response.status(200).end(msg);
+});
 /*
  * Use express to handle argument passing in the URL.  This .get will cause express
  * To accept URLs with /test/<something> and return the something in request.params.p1
@@ -130,6 +212,13 @@ app.get('/test/:p1', function (request, response) {
  * URL /user/list - Return all the User object.
  */
 app.get('/user/list', function (request, response) {
+    console.log("user/list::userLoggedIn: ", request.session.userIsLoggedIn);
+    if (!request.session.userIsLoggedIn) {
+        let err_msg = "/user/list/::error: " + request.body.login_name + " is not logged in.";
+        console.log(err_msg);
+        response.status(401).send(err_msg);
+        return;
+    }
     User.find({}, function(err, users) {
         if (err) {
             // Query returned an error.  We pass it back to the browser with an Internal Service
@@ -164,6 +253,13 @@ app.get('/user/list', function (request, response) {
  * URL /user/:id - Return the information for User (id)
  */
 app.get('/user/:id', function (request, response) {
+    if (!request.session.userIsLoggedIn) {
+        let err_msg = "/user/list/::error: " + request.body.login_name + " is not logged in.";
+        console.log(err_msg);
+        response.status(401).send(err_msg);
+        return;
+    }
+
     var id = request.params.id;
     User.findOne({_id: id}, function(err, user) {
         if (err) {
@@ -199,6 +295,13 @@ app.get('/user/:id', function (request, response) {
  * URL /photosOfUser/:id - Return the Photos for User (id)
  */
 app.get('/photosOfUser/:id', function (request, response) {
+    if (!request.session.userIsLoggedIn) {
+        let err_msg = "/user/list/::error: " + request.body.login_name + " is not logged in.";
+        console.log(err_msg);
+        response.status(401).send(err_msg);
+        return;
+    }
+    
     var id = request.params.id;
     //NOTE user_id === Mongo Id of User Schema.
     //Note _id is the Mongo Id of the Photo Schema.
