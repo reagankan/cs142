@@ -47,3 +47,62 @@ Install
 
 Axios
 Slide 11: https://web.stanford.edu/class/cs142/lectures/ServerCom.pdf
+
+
+
+
+
+
+
+
+
+Deployment
+1. remote database on MongoDB Atlas
+	- account info
+		username: reagankan@gmail.com
+		password: camel_case(mongodb);
+	- novice checklist
+		1. build first cluster - use UI
+			Data Storage (LHS)
+				> Clusters (1st option)
+					> Create a New Cluster (RHS Green Button)
+		2. create first DB user
+			Security (LHS)
+				> Database Access (1st option)
+					> Add new db user (RHS Green Button)
+						>read/write any database.
+		3. whitelist your IP
+			Data Storage (LHS)
+				> Clusters (1st)
+					> Connect (RHS Gray Button) [3 Steps]
+						1. Setup connection security 
+							a. Whitelist an IP connection. used current IP. named it: home-tp-link
+							b. Create a db user (already done in STEP 2).
+						2. Choose a connection method [3 options]
+							selection: Connect your application. 
+							this just gave a code snippet in preferred language to connect.
+							```javascript
+							const MongoClient = require('mongodb').MongoClient;
+							const uri = "mongodb+srv://stanford-cs142-project6-user:<password>@stanfordcs142.mneld.azure.mongodb.net/<dbname>?retryWrites=true&w=majority";
+							const client = new MongoClient(uri, { useNewUrlParser: true });
+							client.connect(err => {
+							  const collection = client.db("test").collection("devices");
+							  // perform actions on the collection object
+							  client.close();
+							});
+
+							```
+							This is awfully similar to mongoose.connect('mongodb://localhost/cs142project6', { useNewUrlParser: true, useUnifiedTopology: true });
+
+							Just change the URI(universal resource identifier) to the db link in the snippet.
+							URI Info
+								1. DB user / password
+								2. database name. //will auto-gen if non-existent.
+							DO this for all files that need to connect:
+								1. loadDatabase.js
+								2. webServer.js
+
+
+
+		4. connect to DB
+brew tap heroku/brew && brew install heroku
