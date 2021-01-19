@@ -1,7 +1,10 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 import {
   AppBar, Toolbar, Typography
 } from '@material-ui/core';
+import Button from '@material-ui/core/Button';
+
 import './TopBar.css';
 
 import {LoginContext} from '../loginContext/LoginContext';
@@ -18,6 +21,16 @@ class TopBar extends React.Component {
     //WEIRD!! https://github.com/facebook/react/issues/6598
     //this.context is only available in React version 16.3.0+
     // also only in LIFECYCLE methods. which does NOT include the constructor.
+    //
+    //Solution
+    /*
+    1. set a static variable `contextType` to the context class
+      e.g. static contextType = LoginContext; //remember to import LoginContext
+    2. pass in as argument to constructor and set `this.context`
+      e.g. this.state.context = context; //TODO: refactor to this.
+      e.g. this.context = context;
+    
+    */
     super(props);
 
     this.context = context;
@@ -112,14 +125,14 @@ class TopBar extends React.Component {
     let pIndex = url.search(/\/users\//i);
     const atHomePage = (uIndex === -1 && pIndex === -1);
 
-    let context = "";
+    // let context;
     if (atHomePage) {
       const isLoaded = this.state.versionIsLoaded;
       const error = this.state.error;
       if (error || !isLoaded) {
-        context = "Home Page";
+        // context = "Home Page";
       } else {
-        context = "Home Page " + this.state.version;
+        // context = "Home Page " + this.state.version;
       }
     } else {
       const isLoaded = this.state.userIsLoaded;
@@ -127,23 +140,42 @@ class TopBar extends React.Component {
       if (error || !isLoaded) {
         //don't display anything for context.
       } else {
-        let userModel = this.state.userModel;
-        let name = userModel.first_name + " " + userModel.last_name;
-        context = (uIndex === -1) ? "Hi, " + name : name + "'s Photos";
+        // let userModel = this.state.userModel;
+        // let name = userModel.first_name + " " + userModel.last_name;
+        // context = (uIndex === -1) ? "Hi, " + name : name + "'s Photos"; //TODO: fix this.
       }
     }
+
+    //for Add Photop Button
+    // const [anchorEl, setAnchorEl] = React.useState(null);
+    // const handleClick = (event) => {
+    //   setAnchorEl(event.currentTarget);
+    // };
     
     return (
-      <AppBar className="cs142-topbar-appBar" position="absolute">
+      <AppBar className="cs142-topbar-appBar" position="absolute" style={{background: "#55b0c9"}}>
         <Toolbar className="cs142-topbar-flexbox">
           <Typography variant="h5" color="inherit" className="cs142-topbar-flexitem name">
-            Reagan Kan&apos;s FB
+            San Diego Refugee Tutoring: Fast Math Worksheet
           </Typography>
 
+          { //Add Photo Button.
+            this.context ? 
+            // this shoudl go in the materialUI PopOver.
+            // perhaps place PopOver in a new component called userUploadPhoto
+            // remember to link in photoShare.jsx
+            //<input type="file" accept="image/*" ref={(domFileRef) => { this.uploadInput = domFileRef; }} />
+            <Button size="small" variant="contained" color="primary">
+              <Link to={"/users/" + this.context._id}> Add Photos </Link>
+            </Button>
+            // <div>Add Photo </div>
+            :
+            ""
+          }
           <div className="cs142-topbar-flexitem context">
           <Typography variant="h5" color="inherit">
             {
-              this.context ? context : "Please Login"
+              this.context ? "Hi " + this.context.first_name + this.context.last_name : "Login Page"
             }
           </Typography>
 

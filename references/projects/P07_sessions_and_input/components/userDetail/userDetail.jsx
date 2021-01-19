@@ -2,7 +2,7 @@ import React from 'react';
 import {Link} from 'react-router-dom';
 
 import {
-  Typography
+  Typography, Popover
 } from '@material-ui/core';
 import './userDetail.css';
 
@@ -10,6 +10,8 @@ import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
+
+import {LoginContext} from '../loginContext/LoginContext';
 
 import axios from 'axios';
 
@@ -19,7 +21,8 @@ import axios from 'axios';
  * Define UserDetail, a React componment of CS142 project #5
  */
 class UserDetail extends React.Component {
-  constructor(props) {
+  static contextType = LoginContext;
+  constructor(props, context) {
     super(props);
 
     // Problem #1: use window.cs142models hack for server.
@@ -39,6 +42,8 @@ class UserDetail extends React.Component {
     // Project 5, Problem #2: use lib/fetchModel to interface XMLHttpResponse
     // Project 6, Problem #2: use axios ... 
     this.state = {
+      loggedInUser: context,
+
       userIsLoaded: false,
       photoIsLoaded: false,
       error: null,
@@ -51,11 +56,17 @@ class UserDetail extends React.Component {
       location: null,
       occupation: null,
       photoModel: null,
+
+      openPopover: false,
     }
 
     this.handleSuccess = this.handleSuccess.bind(this);
     this.handleError = this.handleError.bind(this);
+
+    this.handlePickPhoto = this.handlePickPhoto.bind(this);
+    this.handleSubmitPhoto = this.handleSubmitPhoto.bind(this);
   }
+
   getPhotoPath(idx) {
     const error = this.state.error;
     const isLoaded = this.state.photoIsLoaded;
@@ -97,6 +108,35 @@ class UserDetail extends React.Component {
       error: error
     } );
   }
+  handlePickPhoto(domFileRef) {
+    this.uploadInput = domFileRef;
+    console.log("PICK::uploadInput", this.uploadInput)
+  }
+  handleSubmitPhoto(event) {
+    console.log("SUBMIT::uploadInput", this.uploadInput.files[0])
+    event.preventDefault();
+    if (this.uploadInput.files.length > 0) {
+    // Create a DOM form and add the file to it under the name uploadedphoto
+    const domForm = new FormData();
+    domForm.append('uploadedphoto', this.uploadInput.files[0]);
+
+    // make post using domForm.
+    // when complete 2 things should've happened.
+    // 1. a new image was saved under ./images
+    // 2. a new Mongoose Photo with proper metadata is saved in database
+    axios.post(
+    '/photos/new',
+    domForm
+    ).then((res) => {
+      console.log(res);
+    }).catch(err => console.log("POST ERR: ", err));
+    }
+
+    // close popover
+    this.setState({
+      openPopover: !this.state.openPopover
+    })         
+  }
   componentDidMount() {
     let currId = this.props.match.params.userId;
 
@@ -129,6 +169,25 @@ class UserDetail extends React.Component {
       description = this.state.description;
       id = this.state.id;
     }
+
+    //
+    // const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const handleClick = () => {
+      this.setState({
+        openPopover: !this.state.openPopover
+      })
+    };
+
+    const AddPhotoButton = () => {
+      if (this.state.loggedInUser._id === this.state.id) {
+        return (<Button size="small" variant="contained" color="primary" onClick={handleClick}>
+          Add Photos
+        </Button>)
+      }
+      return null;
+    }
+
     return (
       <div>
       {
@@ -137,6 +196,43 @@ class UserDetail extends React.Component {
               <img className="userDetail-coverImage" src={this.getPhotoPath()}></img>
             </div>
             <CardContent>
+            { 
+              <Popover
+                open={this.state.openPopover}
+
+                anchorOrigin={{
+                  vertical: 'center',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'center',
+                  horizontal: 'center',
+                }}
+              >
+                <Card>
+                  <CardContent>
+                    <Typography>
+                      Upload Photo
+                    </Typography>
+                    <input type="file" accept="image/*" ref={this.handlePickPhoto} />
+                  </CardContent>
+                  <CardActions>
+                    <Button size="small" variant="contained" color="primary"
+                      onClick={
+                        this.handleSubmitPhoto
+                      }
+                    >
+                      Upload
+                    </Button>
+                    <Button size="small" variant="contained" color="primary" onClick={handleClick}>
+                      Cancel
+                    </Button>
+                  </CardActions>
+                </Card>
+              </Popover>
+            }
+
+
               <Typography gutterBottom variant="h5" component="h2">
                 {full_name}
               </Typography>
@@ -147,9 +243,12 @@ class UserDetail extends React.Component {
               </Typography>
             </CardContent>
             <CardActions>
-              <Button size="small" color="primary">
+              <Button size="small" variant="contained" color="primary">
                 <Link to={"/photos/" + id}> View Photos </Link>
               </Button>
+              {
+                AddPhotoButton()
+              }
             </CardActions>
         </Card>
       }

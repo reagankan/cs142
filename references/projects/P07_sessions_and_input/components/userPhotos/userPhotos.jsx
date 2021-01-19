@@ -6,6 +6,8 @@ import {
 } from '@material-ui/core';
 import './userPhotos.css';
 
+import {LoginContext} from '../loginContext/LoginContext'; //need user for adding comments.
+
 
 import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
@@ -21,9 +23,11 @@ import axios from 'axios';
  * Define UserPhotos, a React componment of CS142 project #5
  */
 class UserPhotos extends React.Component {
-  constructor(props) {
+  static contextType = LoginContext;
+  constructor(props, context) {
     super(props);
 
+    this.loggedInUser = context;
     // Problem #1: use window.cs142models hack for server.
     // let userModel = window.cs142models.userModel(this.props.match.params.userId);
     // let photoModel = window.cs142models.photoOfUserModel(this.props.match.params.userId);
@@ -55,11 +59,16 @@ class UserPhotos extends React.Component {
       occupation: null,
       
       photoModel: null,
-      onlyOnePhoto: null
+      onlyOnePhoto: null,
+
+      newComment: null,
+      refreshPhotos: false,
     }
 
     this.handleSuccess = this.handleSuccess.bind(this);
     this.handleError = this.handleError.bind(this);
+    this.saveNewComment = this.saveNewComment.bind(this);
+    this.handleSubmitSuccess = this.handleSubmitSuccess.bind(this);
   }
   handleSuccess(value) {
     //recall, fetchModel returns modelInfo in object.data property.
@@ -70,6 +79,7 @@ class UserPhotos extends React.Component {
         id: this.props.match.params.userId,
         photoModel: value.data,
         onlyOnePhoto: (value.data.length === 1),
+        error: false
       } );
     } else {
       this.setState( {
@@ -84,10 +94,36 @@ class UserPhotos extends React.Component {
       } );
     }
   }
+  handleSubmitSuccess() {
+    axios.get("/photosOfUser/" + this.state.id).then(this.handleSuccess).catch(this.handleError);
+  }
   handleError(error) {
     this.setState( {
       error: error
     } );
+  }
+  saveNewComment(event) {
+    this.setState({
+      newComment: event.target.value
+    });
+  }
+  submitNewComment(photoId, event) {
+    event.preventDefault();
+
+    // clear input text field
+    let inputField = document.getElementById(photoId);
+    inputField.value = "";
+    
+    // POST new comment to backend
+    // on success:
+    //   use handleSubmitSuccess handler
+    //   to reload ALL photos of owner of page
+    //   which COULD BE different from the user.
+    axios.post("/commentsOfPhoto/" + photoId,
+      {
+        comment: this.state.newComment,
+      }
+    ).then(this.handleSubmitSuccess).catch(this.handleError);
   }
   getUserPhotos() {
     const isLoaded = this.state.userIsLoaded;
@@ -145,31 +181,50 @@ class UserPhotos extends React.Component {
     }
     let n = commentObjects.length;
     for (let i = 0; i < n; i++) {
-      let com = this.getOneComment(commentObjects[i], i < n-1);
+      let com = this.getOneComment(commentObjects[i], true);//insertDiv=True, since we add a new line below.
       comments.push(com);
     }
+
     return comments;
   }
-  getCommentCards() {
+  getPhotoCards() {
     const isLoaded = this.state.photoIsLoaded;
     const error = this.state.error;
     if (error || !isLoaded) {
       return;
     }
     let cards = []
+
     for (let image of this.state.photoModel) {
       let imageElem = <div className="userDetail-coverImageBox">
               <img className="userDetail-coverImage" src={"images/"+image.file_name}></img>
             </div>;
 
+      // Add card for each photo and its comments.
+      let newCommentElement = <div key={this.loggedInUser._id}>
+        <label>
+          <Typography color="textSecondary" component="p">
+            <Link to={"/users/" + this.loggedInUser._id} className="userPhotos-link"><b>{this.loggedInUser.first_name + " " + this.loggedInUser.last_name}</b></Link>
+          </Typography>
+          
+          <form onSubmit={this.submitNewComment.bind(this, image._id)}>
+            <input
+              type="text" 
+              id={image._id} //saveNewComment needs ID to clear input field. 
+              onChange={this.saveNewComment}/>
+            <input type="submit" value="Add comment"/>
+          </form>
+        </label>
+      </div>;
       let card = <Card key={image.file_name} style={{ left: 0 }}>
         <CardContent>
           {imageElem}
           {this.getComments(image.comments, image.file_name + " (" + image.date_time + ")")}
+          {newCommentElement}
         </CardContent>
       </Card>
       cards.push(card)
-    }
+    } 
     return cards;
   }
   componentDidMount() {
@@ -179,7 +234,23 @@ class UserPhotos extends React.Component {
     axios.get("/user/" + currId).then(this.handleSuccess).catch(this.handleError);
     axios.get("/photosOfUser/" + currId).then(this.handleSuccess).catch(this.handleError);
   }
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
+    console.log("componentDidUpdate::this.Props", this.props)
+    console.log("componentDidUpdate::prevProps", prevProps)
+    console.log("componentDidUpdate::this.state", this.state)
+    console.log("componentDidUpdate::prevState", prevState)
+
+    if (this.state === prevState) {
+      return;
+    }
+
+    
+    //Case: update photos
+    // if (prevState.id && this.state.id && prevState.id === this.state.id) {
+    //   axios.get("/photosOfUser/" + this.state.id).then(this.handleSuccess).catch(this.handleError);
+    //   return;
+    // }
+
     let prevId = prevProps.match.params.userId;
     let currId = this.props.match.params.userId;
     if (prevId !== currId) {
@@ -214,7 +285,7 @@ class UserPhotos extends React.Component {
         <ul>
         {
           //cards with comments
-          this.getCommentCards()
+          this.getPhotoCards()
         }
         </ul>
       </div>

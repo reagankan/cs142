@@ -22,17 +22,18 @@ class PhotoShare extends React.Component {
     super(props);
 
     this.state = {
-      currentUser: context
+      currentUser: context //should be null and later set to type (MongooseUser.jsObject) by LoginRegister
     }
 
     this.parentCallback = this.parentCallback.bind(this);
   }
   componentDidMount() {
-    this.setState({
-      currentUser: this.context
-    })
+    console.log("PhotoShare::componentDIDmount::this.state.currentUser", this.state.currentUser)
   }
   parentCallback(fromChild) {
+    //A callback that sets this.state.currentUser
+    // should be called by LoginRegister (login) and TopBar (Logout)
+
     // console.log("FROM CHILD: ", fromChild);
     this.setState({
       currentUser: fromChild
@@ -41,10 +42,9 @@ class PhotoShare extends React.Component {
   render() {
     // console.log("PhotoShare::render::this.state.currentUser: ", this.state.currentUser);
     return (
-      <LoginContext.Provider value={this.state.currentUser}>
+      <LoginContext.Provider value={this.state.currentUser} style={{background: "black"}}>
       <HashRouter>
-        <div>
-          <Grid container spacing={8}>
+          <Grid container spacing={8} style={{background: "black", minHeight: '100vh'}} alignItems="center" direction={this.state.currentUser ?  null : "column" } justify={this.state.currentUser ? null: "center" }>
             <Grid item xs={12}>\
               <Route path="/*"
                     render={
@@ -55,16 +55,17 @@ class PhotoShare extends React.Component {
                     }
               />
             </Grid>
-            <div className="cs142-main-topbar-buffer"/>
-            <Grid item sm={3}>
-              <Paper  className="cs142-main-grid-item">
-                {
-                  this.state.currentUser && <UserList />
-                }
-              </Paper>
-            </Grid>
-            <Grid item sm={9}>
-              <Paper className="cs142-main-grid-item">
+            {
+              this.state.currentUser && <Grid item sm={3}>
+                <Paper  className="cs142-main-grid-item" style={{background: "#55b0c9"}}>
+                  {
+                     <UserList/>
+                  }
+                </Paper>
+              </Grid>
+            }
+            <Grid item sm={9}  width={1}>
+              <Paper className="cs142-main-grid-item" style={{background: "#55b0c9"}}>
                 <Switch>
                 <React.Fragment> 
                 {
@@ -89,6 +90,12 @@ class PhotoShare extends React.Component {
                   <Route path="/login-register/:mode"
                     render={
                       (props) => {
+                        // Before login, this.state.currentUser is null
+                        // After login, we update this.state.currentUser using a parentCallback
+                        // Since, PhotoShare is the root component, the entire app
+                        //  will have acces to this.state.currentUser via LoginContext
+
+                        // :mode \in {login, register}
                         props.parentCallback = this.parentCallback;
                         return <LoginRegister {...props} />; 
                       }
@@ -100,7 +107,6 @@ class PhotoShare extends React.Component {
               </Paper>
             </Grid>
           </Grid>
-        </div>
       </HashRouter>
       </LoginContext.Provider>
     );
@@ -109,6 +115,6 @@ class PhotoShare extends React.Component {
 
 
 ReactDOM.render(
-  <PhotoShare />,
+  <PhotoShare/>,
   document.getElementById('photoshareapp'),
 );

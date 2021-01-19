@@ -17,6 +17,8 @@ var userSchema = new mongoose.Schema({
 
     //project 7
     login_name: String,
+    password_digest: String,
+    salt: String,
 });
 
 // the schema is useless so far

@@ -19,6 +19,10 @@
  *
  */
 
+// Get salted password functions.
+var cs142password = require('./cs142password.js').cs142password;
+var makePasswordEntry = cs142password.makePasswordEntry;
+
 // Get the magic models we used in the previous projects.
 var cs142models = require('./modelData/photoApp.js').cs142models;
 
@@ -47,6 +51,9 @@ Promise.all(removePromises).then(function () {
     var userModels = cs142models.userListModel();
     var mapFakeId2RealId = {}; // Map from fake id to real Mongo _id
     var userPromises = userModels.map(function (user) {
+        var rawPassword = 'weak';
+        var saltedPassword = makePasswordEntry(rawPassword);
+
         return User.create({
             first_name: user.first_name,
             last_name: user.last_name,
@@ -54,7 +61,9 @@ Promise.all(removePromises).then(function () {
             description: user.description,
             occupation: user.occupation,
             login_name: user.last_name.toLowerCase(),
-            password: 'weak'
+            // password: 'weak'
+            password_digest: saltedPassword.hash,
+            salt: saltedPassword.salt,
         }).then(function (userObj) {
             // Set the unique ID of the object. We use the MongoDB generated _id for now
             // but we keep it distinct from the MongoDB ID so we can go to something
@@ -99,7 +108,7 @@ Promise.all(removePromises).then(function () {
                     });
                 }
                 photoObj.save();
-                console.log('Adding photo:', photo.file_name, ' of user ID ', photoObj.user_id);
+                console.log('Adding photo:', photo.file_name, photoObj._id, ' of user ID ', photoObj.user_id);
             }).catch(function (err){
                 console.error('Error create user', err);
             });

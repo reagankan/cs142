@@ -16,10 +16,10 @@ var port = 3000;
 var host = 'localhost';
 
 // Valid properties of a user list model
-var userListProperties = ['first_name', 'last_name', '_id'];
+var userListProperties = ['first_name', 'last_name', '_id', 'password_digest', 'salt'];
 // Valid properties of a user detail model
 var userDetailProperties = ['first_name', 'last_name', '_id',
-    'location', 'description', 'occupation'];
+    'location', 'description', 'occupation', 'password_digest', 'salt'];
 // Valid properties of the photo model
 var photoProperties = ['file_name', 'date_time', 'user_id', '_id'];
 // Valid comments properties

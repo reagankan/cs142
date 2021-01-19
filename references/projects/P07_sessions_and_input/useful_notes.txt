@@ -5,6 +5,7 @@ Running the Web App
 	npm run nodemon :- actively monitors server code BACKEND
 	npm run build:w :- webpack actively monitors React components FRONTEND
 
+
 Running the Test Suite
 	1. launch mongoDB
 		mongod --config /usr/local/etc/mongod.conf --fork
@@ -15,6 +16,12 @@ Running the Test Suite
 	4. run tests
 		cd test
 		npm test
+
+Killing Node Apps
+    1. Find PID
+        lsof -i tcp:3000 
+    2. Kill Process
+        kill -9 PID
 
 MongoDB Usage
 	mongod --config /usr/local/etc/mongod.conf --fork
